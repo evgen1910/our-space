@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Пирожочек и Компотик">
+<title>Пирожочек и Компотик</title>
+<style>
+  /* ── RESET & BASE ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #fdf8f4;
+    --card:     #ffffff;
+    --border:   #e8d8c8;
+    --border2:  #f0e4d8;
+    --accent:   #c8845a;
+    --accent2:  #7a4a2a;
+    --text:     #5a3a1a;
+    --text2:    #9a6a3a;
+    --text3:    #b07c55;
+    --text4:    #c8a07a;
+    --pill-bg:  #f5ede3;
+    --today-bg: #fdebd8;
+    --green-bg: #e8f5ee;
+    --green-tx: #2a6a3a;
+    --red-bg:   #fdebd8;
+    --red-tx:   #9a4a1a;
+    --tag-bg:   #fdebd8;
+    --tag-tx:   #9a5a2a;
+    --font: 'Georgia', serif;
+    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  html { background: var(--bg); }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ───────────────────────────────────────────────── */
+  .header {
+    background: var(--card);
+    border-bottom: 0.5px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--pill-bg);
+    border: 1px dashed var(--text4);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; }
+  .logo-placeholder { font-size: 20px; color: var(--text4); }
+  .header-title { font-size: 15px; font-weight: 600; color: var(--text); font-family: var(--font); }
+  .header-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ── SECTION ──────────────────────────────────────────────── */
+  .content { padding: 14px 14px 0; }
+  .sec-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 9px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sec-label svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; }
+  .section { margin-top: 18px; }
+
+  /* ── CARD ─────────────────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .divider { height: 0.5px; background: var(--border2); margin: 10px 0; }
+
+  /* ── HOLIDAY BANNER ───────────────────────────────────────── */
+  .holiday-banner {
+    background: #fff7f0;
+    border: 0.5px solid #e8c8a0;
+    border-radius: 12px;
+    padding: 11px 13px;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .holiday-banner .hb-icon { font-size: 22px; flex-shrink: 0; }
+  .holiday-banner .hb-title { font-size: 13px; font-weight: 600; color: var(--accent2); }
+  .holiday-banner .hb-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .no-holiday {
+    background: var(--pill-bg); border-radius: 12px;
+    padding: 9px 13px; margin-bottom: 10px;
+    font-size: 12px; color: var(--text3);
+  }
+
+  /* ── WEEK HOLIDAYS ────────────────────────────────────────── */
+  .week-holidays { background: var(--card); border: 0.5px solid var(--border); border-radius: 12px; padding: 2px 13px; margin-bottom: 10px; }
+  .wh-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--border2); }
+  .wh-row:last-child { border-bottom: none; }
+  .wh-date { font-size: 11px; color: var(--text3); width: 32px; flex-shrink: 0; }
+  .wh-name { font-size: 13px; color: var(--text); flex: 1; }
+  .wh-days { font-size: 10px; color: var(--accent); background: #fff7f0; border-radius: 6px; padding: 1px 6px; flex-shrink: 0; }
+
+  /* ── CAL LINK ─────────────────────────────────────────────── */
+  .ext-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 13px;
+    background: var(--card); border: 0.5px solid var(--border); border-radius: 10px;
+    margin-bottom: 10px; text-decoration: none; cursor: pointer;
+    color: var(--text);
+  }
+  .ext-link .el-icon { font-size: 16px; flex-shrink: 0; }
+  .ext-link span { font-size: 13px; flex: 1; }
+  .ext-link .el-arr { font-size: 13px; color: var(--text4); }
+
+  /* ── TRACKER ──────────────────────────────────────────────── */
+  .legend { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .leg-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text2); }
+  .leg-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+  .leg-dot.food  { background: var(--accent); }
+  .leg-dot.sport { background: var(--accent2); }
+  .leg-dot.today { background: var(--today-bg); border: 1.5px solid var(--accent); }
+  .hint { font-size: 10px; color: var(--text4); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+
+  .person-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .person-name { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: .03em; text-transform: uppercase; }
+  .weight-inline { text-align: right; }
+  .weight-inline .wval { font-size: 16px; font-weight: 600; color: var(--accent2); line-height: 1; }
+  .weight-inline .wkg  { font-size: 10px; color: var(--text3); font-weight: 400; }
+  .weight-inline .wsub { font-size: 9px; color: var(--text4); margin-top: 1px; }
+
+  .tracker-block { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 5px; }
+  .tracker-meta  { width: 52px; flex-shrink: 0; padding-top: 2px; }
+  .tracker-meta .tm-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+  .tracker-meta .tm-stat  { font-size: 15px; font-weight: 600; color: var(--accent2); line-height: 1; }
+  .tracker-meta .tm-sub   { font-size: 9px; color: var(--text4); margin-top: 1px; }
+
+  .days-col { flex: 1; min-width: 0; }
+  .days-header { display: flex; gap: 2px; margin-bottom: 3px; }
+  .day-lbl { flex: 1; text-align: center; font-size: 8px; color: var(--text4); min-width: 0; }
+  .dots { display: flex; gap: 2px; }
+  .dot {
+    flex: 1; min-width: 0; height: 30px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .12s, opacity .12s;
+    user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  .dot.food-on       { background: var(--accent); }
+  .dot.sport-on      { background: var(--accent2); }
+  .dot.off           { background: var(--pill-bg); border: 0.5px solid #e0c8b0; }
+  .dot.today-off     { background: var(--today-bg); border: 1.5px solid var(--accent); }
+  .dot.today-food-on { background: var(--accent);  border: 2px solid var(--accent2); }
+  .dot.today-sport-on{ background: var(--accent2); border: 2px solid #3a1a0a; }
+  .dot:active { opacity: .7; }
+
+  .kcal-row { display: flex; gap: 2px; margin-left: 60px; margin-top: 3px; margin-bottom: 2px; }
+  .kd { flex: 1; min-width: 0; height: 14px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600; }
+  .kd.def  { background: var(--green-bg); color: var(--green-tx); }
+  .kd.sup  { background: var(--red-bg);   color: var(--red-tx); }
+  .kd.bal  { background: var(--pill-bg);  color: var(--accent2); }
+  .kd.none { background: transparent; }
+  .kcal-legend { font-size: 9px; color: var(--text3); display: flex; gap: 8px; margin-left: 60px; margin-bottom: 8px; }
+
+  .btn-row { display: flex; gap: 6px; margin-top: 10px; }
+  .add-btn {
+    flex: 1; padding: 8px 6px;
+    background: transparent; border: 0.5px dashed var(--text4);
+    border-radius: 10px; color: var(--text3); font-size: 11px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+    font-family: var(--font-ui);
+    -webkit-tap-highlight-color: transparent;
+    transition: background .12s;
+  }
+  .add-btn:active { background: var(--pill-bg); }
+
+  .kcal-picker {
+    background: #fff7f0; border: 0.5px solid #e8c8a0; border-radius: 10px;
+    padding: 10px; margin-top: 8px;
+    display: none; flex-direction: column; gap: 7px;
+  }
+  .kcal-picker.open { display: flex; }
+  .kcal-picker .kp-label { font-size: 10px; color: var(--text3); }
+  .kcal-options { display: flex; gap: 5px; }
+  .kcal-opt {
+    flex: 1; padding: 7px 2px; border-radius: 8px;
+    border: 0.5px solid #e0c8b0; background: var(--card);
+    font-size: 10px; color: var(--accent2); cursor: pointer; text-align: center;
+    font-family: var(--font-ui); transition: background .1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kcal-opt:active { opacity: .8; }
+  .kcal-opt.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .kcal-opt.reset    { color: var(--text4); font-size: 10px; }
+
+  /* Weight modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(90,58,26,.25); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card); border-radius: 20px 20px 0 0;
+    padding: 20px 20px 36px; width: 100%; max-width: 480px;
+    border-top: 0.5px solid var(--border);
+  }
+  .modal-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+  .modal-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .modal-label { font-size: 12px; color: var(--text3); width: 80px; flex-shrink: 0; }
+  .modal-input {
+    flex: 1; padding: 8px 12px; border: 0.5px solid var(--border);
+    border-radius: 8px; font-size: 14px; color: var(--text);
+    background: var(--bg); font-family: var(--font-ui); outline: none;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-btn-row { display: flex; gap: 8px; margin-top: 4px; }
+  .modal-btn {
+    flex: 1; padding: 10px; border-radius: 10px; border: none;
+    font-size: 13px; font-family: var(--font-ui); cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .modal-btn.primary { background: var(--accent); color: #fff; }
+  .modal-btn.secondary { background: var(--pill-bg); color: var(--text2); }
+
+  /* ── DASH LINK ────────────────────────────────────────────── */
+  .dash-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 13px; background: var(--card);
+    border: 0.5px solid var(--border); border-radius: 10px;
+    margin-bottom: 10px; cursor: pointer; text-decoration: none; color: var(--text);
+  }
+  .dash-link .dl-icon { font-size: 16px; color: var(--accent); }
+  .dash-link span { font-size: 13px; flex: 1; }
+  .dash-link .dl-arr { font-size: 13px; color: var(--text4); }
+
+  /* ── DREAMS ───────────────────────────────────────────────── */
+  .dream-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--border2); }
+  .dream-item:last-child { border-bottom: none; }
+  .dream-icon { font-size: 14px; color: var(--accent); flex-shrink: 0; }
+  .dream-text { font-size: 13px; color: var(--text); flex: 1; min-width: 0; word-break: break-word; }
+  .dream-text.done { text-decoration: line-through; color: var(--text3); }
+  .dream-tag { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: var(--tag-bg); color: var(--tag-tx); flex-shrink: 0; }
+  .dream-tag.done { background: var(--pill-bg); color: var(--text3); }
+  .dream-actions { display: flex; gap: 3px; flex-shrink: 0; }
+  .dream-btn {
+    font-size: 10px; padding: 3px 6px; border-radius: 6px;
+    border: 0.5px solid #e0c8b0; background: transparent; color: var(--text3);
+    cursor: pointer; font-family: var(--font-ui); white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dream-btn.ok { background: var(--pill-bg); color: var(--accent2); border-color: #d0b898; }
+  .dream-empty { font-size: 12px; color: var(--text4); padding: 8px 0; text-align: center; }
+  .add-dream-btn {
+    width: 100%; padding: 9px; margin-top: 8px;
+    background: transparent; border: 0.5px dashed var(--text4);
+    border-radius: 10px; color: var(--text3); font-size: 12px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
+    font-family: var(--font-ui); -webkit-tap-highlight-color: transparent;
+    transition: background .12s;
+  }
+  .add-dream-btn:active { background: var(--pill-bg); }
+
+  /* Dream add modal */
+  .dream-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(90,58,26,.25); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .dream-modal-overlay.open { display: flex; }
+
+  /* ── LINK BLOCKS ──────────────────────────────────────────── */
+  .link-block { background: var(--card); border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
+  .link-block-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 13px; cursor: pointer; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .link-block-header .lb-icon { font-size: 16px; color: var(--accent); flex-shrink: 0; }
+  .link-block-header .lb-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+  .link-block-header .lb-chev { font-size: 13px; color: var(--text4); transition: transform .2s; }
+  .link-block-header.open .lb-chev { transform: rotate(180deg); }
+  .link-block-body { display: none; padding: 0 13px 12px; border-top: 0.5px solid var(--border2); }
+  .link-block-body.open { display: block; }
+  .link-note {
+    font-size: 12px; color: var(--text); line-height: 1.75;
+    white-space: pre-wrap; padding-top: 10px;
+    outline: none; min-height: 40px; word-break: break-word;
+  }
+  .link-note a { color: var(--accent); text-decoration: underline; }
+  .link-edit-hint { font-size: 9px; color: var(--text4); margin-top: 6px; display: flex; align-items: center; gap: 3px; }
+
+  /* ── LOADING STATE ────────────────────────────────────────── */
+  .loading { text-align: center; padding: 10px 0; font-size: 12px; color: var(--text4); }
+
+  /* ── TOAST ────────────────────────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--accent2); color: #fff; font-size: 12px;
+    padding: 8px 16px; border-radius: 20px; z-index: 200;
+    opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<div class="header">
+  <div class="logo" id="logo-wrap">
+    <!-- Замени src на путь к своему лого после генерации -->
+    <!-- <img src="logo.png" alt="лого"> -->
+    <span class="logo-placeholder">🫐</span>
+  </div>
+  <div>
+    <div class="header-title">Пирожочек и Компотик</div>
+    <div class="header-date" id="hdr-date"></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ── СЕГОДНЯ ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="sec-label">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+      сегодня
+    </div>
+    <div id="today-holiday-block"></div>
+  </div>
+
+  <!-- ── ПРАЗДНИКИ НЕДЕЛИ ────────────────────────────────────── -->
+  <div class="section">
+    <div class="sec-label">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      праздники недели
+    </div>
+    <div id="week-holidays-block"><div class="loading">загружаем...</div></div>
+    <a class="ext-link" href="https://calendar.google.com" target="_blank" id="cal-link">
+      <!-- Замени href на ссылку своего Google Calendar -->
+      <span class="el-icon">📅</span>
+      <span>открыть Google Календарь</span>
+      <span class="el-arr">→</span>
+    </a>
+  </div>
+
+  <!-- ── ПИТАНИЕ И СПОРТ ─────────────────────────────────────── -->
+  <div class="section">
+    <div class="sec-label">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      питание и спорт
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot food"></div> питание соблюдено</div>
+      <div class="leg-item"><div class="leg-dot sport"></div> тренировка</div>
+      <div class="leg-item"><div class="leg-dot today"></div> сегодня</div>
+    </div>
+    <div class="hint">👆 нажми кружок — поставь или сними отметку</div>
+
+    <!-- Компотик -->
+    <div class="card" id="card-k">
+      <div class="person-header">
+        <div class="person-name">Компотик</div>
+        <div class="weight-inline" id="k-weight-block">
+          <div class="wval wsub" style="font-size:11px; color:var(--text4)">загружаем...</div>
+        </div>
+      </div>
+      <div class="tracker-block">
+        <div class="tracker-meta">
+          <div class="tm-label">питание</div>
+          <div class="tm-stat" id="k-food-stat">—</div>
+          <div class="tm-sub">дней</div>
+        </div>
+        <div class="days-col">
+          <div class="days-header" id="k-days-hdr"></div>
+          <div class="dots" id="k-food-dots"></div>
+        </div>
+      </div>
+      <div class="kcal-row" id="k-kcal-row"></div>
+      <div class="kcal-legend"><span>− дефицит</span><span>≈ поддержка</span><span>+ профицит</span></div>
+      <div class="tracker-block">
+        <div class="tracker-meta">
+          <div class="tm-label">тренировки</div>
+          <div class="tm-stat" id="k-sport-stat">—</div>
+          <div class="tm-sub">за неделю</div>
+        </div>
+        <div class="days-col">
+          <div class="dots" id="k-sport-dots"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="add-btn" onclick="openKcal('k')">🔥 калории за день</button>
+        <button class="add-btn" onclick="openWeightModal('k')">⚖️ добавить вес</button>
+      </div>
+      <div class="kcal-picker" id="k-kcal-picker">
+        <div class="kp-label">сегодня — выбери тип калорий:</div>
+        <div class="kcal-options">
+          <div class="kcal-opt" id="k-opt-def" onclick="setKcal('k','def')">− дефицит</div>
+          <div class="kcal-opt" id="k-opt-bal" onclick="setKcal('k','bal')">≈ поддержка</div>
+          <div class="kcal-opt" id="k-opt-sup" onclick="setKcal('k','sup')">+ профицит</div>
+          <div class="kcal-opt reset" onclick="setKcal('k',null)">сбросить</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Пирожочек -->
+    <div class="card" id="card-p">
+      <div class="person-header">
+        <div class="person-name">Пирожочек</div>
+        <div class="weight-inline" id="p-weight-block">
+          <div class="wval wsub" style="font-size:11px; color:var(--text4)">загружаем...</div>
+        </div>
+      </div>
+      <div class="tracker-block">
+        <div class="tracker-meta">
+          <div class="tm-label">питание</div>
+          <div class="tm-stat" id="p-food-stat">—</div>
+          <div class="tm-sub">дней</div>
+        </div>
+        <div class="days-col">
+          <div class="days-header" id="p-days-hdr"></div>
+          <div class="dots" id="p-food-dots"></div>
+        </div>
+      </div>
+      <div class="kcal-row" id="p-kcal-row"></div>
+      <div class="kcal-legend"><span>− дефицит</span><span>≈ поддержка</span><span>+ профицит</span></div>
+      <div class="tracker-block">
+        <div class="tracker-meta">
+          <div class="tm-label">тренировки</div>
+          <div class="tm-stat" id="p-sport-stat">—</div>
+          <div class="tm-sub">за неделю</div>
+        </div>
+        <div class="days-col">
+          <div class="dots" id="p-sport-dots"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="add-btn" onclick="openKcal('p')">🔥 калории за день</button>
+        <button class="add-btn" onclick="openWeightModal('p')">⚖️ добавить вес</button>
+      </div>
+      <div class="kcal-picker" id="p-kcal-picker">
+        <div class="kp-label">сегодня — выбери тип калорий:</div>
+        <div class="kcal-options">
+          <div class="kcal-opt" id="p-opt-def" onclick="setKcal('p','def')">− дефицит</div>
+          <div class="kcal-opt" id="p-opt-bal" onclick="setKcal('p','bal')">≈ поддержка</div>
+          <div class="kcal-opt" id="p-opt-sup" onclick="setKcal('p','sup')">+ профицит</div>
+          <div class="kcal-opt reset" onclick="setKcal('p',null)">сбросить</div>
+        </div>
+      </div>
+    </div>
+
+    <a class="dash-link" href="#" id="dash-link" target="_blank">
+      <!-- href заменишь на ссылку опубликованного листа dashboard -->
+      <span class="dl-icon">📊</span>
+      <span>статистика по неделям</span>
+      <span class="dl-arr">→</span>
+    </a>
+  </div>
+
+  <!-- ── МЕЧТЫ ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="sec-label">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      мечты и хотелки
+    </div>
+    <div class="card">
+      <div id="dreams-list"><div class="loading">загружаем...</div></div>
+      <button class="add-dream-btn" onclick="openDreamModal()">+ добавить мечту</button>
+    </div>
+  </div>
+
+  <!-- ── ССЫЛКИ ───────────────────────────────────────────────── -->
+  <div class="section" style="padding-bottom: 40px;">
+    <div class="sec-label">
+      <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      наши ссылки
+    </div>
+
+    <div class="link-block" id="lb-photo">
+      <div class="link-block-header" onclick="toggleLink(this)">
+        <span class="lb-icon">📷</span>
+        <span class="lb-title">Фото</span>
+        <span class="lb-chev">▾</span>
+      </div>
+      <div class="link-block-body">
+        <div class="link-note" contenteditable="true" id="note-photo" onblur="saveNote('photo', this)">Вставь ссылку на Google Диск с фото</div>
+        <div class="link-edit-hint">✏️ нажми чтобы редактировать — сохранится автоматически</div>
+      </div>
+    </div>
+
+    <div class="link-block" id="lb-music">
+      <div class="link-block-header" onclick="toggleLink(this)">
+        <span class="lb-icon">🎵</span>
+        <span class="lb-title">Музыка</span>
+        <span class="lb-chev">▾</span>
+      </div>
+      <div class="link-block-body">
+        <div class="link-note" contenteditable="true" id="note-music" onblur="saveNote('music', this)">Плейлисты и ссылки на музыку</div>
+        <div class="link-edit-hint">✏️ нажми чтобы редактировать — сохранится автоматически</div>
+      </div>
+    </div>
+
+    <div class="link-block" id="lb-films">
+      <div class="link-block-header" onclick="toggleLink(this)">
+        <span class="lb-icon">🎬</span>
+        <span class="lb-title">Фильмы</span>
+        <span class="lb-chev">▾</span>
+      </div>
+      <div class="link-block-body">
+        <div class="link-note" contenteditable="true" id="note-films" onblur="saveNote('films', this)">Что хочу посмотреть...</div>
+        <div class="link-edit-hint">✏️ нажми чтобы редактировать — сохранится автоматически</div>
+      </div>
+    </div>
+
+    <div class="link-block" id="lb-purg">
+      <div class="link-block-header" onclick="toggleLink(this)">
+        <span class="lb-icon">🔥</span>
+        <span class="lb-title">Чистилище</span>
+        <span class="lb-chev">▾</span>
+      </div>
+      <div class="link-block-body">
+        <div class="link-note" contenteditable="true" id="note-purg" onblur="saveNote('purg', this)">Ссылки, записи, всё временное...</div>
+        <div class="link-edit-hint">✏️ нажми чтобы редактировать — сохранится автоматически</div>
+      </div>
+    </div>
+
+    <div class="link-block" id="lb-notes">
+      <div class="link-block-header" onclick="toggleLink(this)">
+        <span class="lb-icon">📝</span>
+        <span class="lb-title">Заметки</span>
+        <span class="lb-chev">▾</span>
+      </div>
+      <div class="link-block-body">
+        <div class="link-note" contenteditable="true" id="note-notes" onblur="saveNote('notes', this)">Важное, что нужно помнить...</div>
+        <div class="link-edit-hint">✏️ нажми чтобы редактировать — сохранится автоматически</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── WEIGHT MODAL ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="weight-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="weight-modal-title">Добавить вес</div>
+    <div class="modal-row">
+      <div class="modal-label">Вес (кг)</div>
+      <input class="modal-input" type="number" step="0.1" min="30" max="200" id="weight-input" placeholder="например 61.4">
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn secondary" onclick="closeWeightModal()">Отмена</button>
+      <button class="modal-btn primary" onclick="submitWeight()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DREAM MODAL ──────────────────────────────────────────── -->
+<div class="dream-modal-overlay" id="dream-modal">
+  <div class="modal-box">
+    <div class="modal-title">Добавить мечту</div>
+    <div class="modal-row">
+      <div class="modal-label">Мечта</div>
+      <input class="modal-input" type="text" id="dream-text-input" placeholder="Например: поехать в Геленджик">
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">Тег</div>
+      <input class="modal-input" type="text" id="dream-tag-input" placeholder="лето, покупка, путешествие...">
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn secondary" onclick="closeDreamModal()">Отмена</button>
+      <button class="modal-btn primary" onclick="submitDream()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const API = 'https://script.google.com/macros/s/AKfycbzIIaqmHVm3C0SCIlYUCUneWkUM_iaOENrLkF0NXgmIH_RDGd-Ar3VPrKPKnoPkIac6/exec';
+// Замени на ссылку своего Google Calendar (iCal публичный)
+const ICAL_URL = '';
+// Замени на ссылку опубликованного листа Dashboard
+const DASHBOARD_URL = '';
+
+// JSONBin.io — для заметок-ссылок
+// Зарегистрируйся на jsonbin.io, создай один bin, вставь данные ниже:
+const JSONBIN_KEY  = 'ТВОЙ_MASTER_KEY';   // X-Master-Key
+const JSONBIN_ID   = 'ТВОЙ_BIN_ID';        // ID bin
+
+// ── UTILS ───────────────────────────────────────────────────────
+const DAYS_RU   = ['вс','пн','вт','ср','чт','пт','сб'];
+const MONTHS_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const WDAYS_RU  = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+
+function fmtDate(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function api(params) {
+  const url = API + '?' + new URLSearchParams(params).toString();
+  return fetch(url).then(r => r.json()).catch(() => ({}));
+}
+
+// ── DATE / HEADER ────────────────────────────────────────────────
+const now      = new Date();
+const todayStr = fmtDate(now);
+document.getElementById('hdr-date').textContent =
+  WDAYS_RU[now.getDay()] + ', ' + now.getDate() + ' ' + MONTHS_RU[now.getMonth()] + ' ' + now.getFullYear();
+
+if (DASHBOARD_URL) document.getElementById('dash-link').href = DASHBOARD_URL;
+
+// ── WEEK DATES ───────────────────────────────────────────────────
+function getWeekDates() {
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - ((now.getDay()+6)%7));
+  return Array.from({length:7}, (_,i) => { const d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+}
+const weekDates  = getWeekDates();
+const weekStart  = fmtDate(weekDates[0]);
+const todayIdx   = weekDates.findIndex(d => fmtDate(d) === todayStr);
+
+function renderDaysHeader(id) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  weekDates.forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'day-lbl';
+    div.textContent = d.getDate() + ' ' + DAYS_RU[d.getDay()];
+    el.appendChild(div);
+  });
+}
+renderDaysHeader('k-days-hdr');
+renderDaysHeader('p-days-hdr');
+
+// ── TRACKER STATE ────────────────────────────────────────────────
+const state = {
+  k: { food: Array(7).fill(0), sport: Array(7).fill(0), kcal: Array(7).fill(null) },
+  p: { food: Array(7).fill(0), sport: Array(7).fill(0), kcal: Array(7).fill(null) }
+};
+
+function renderDots(who, type) {
+  const arr   = state[who][type];
+  const el    = document.getElementById(who+'-'+type+'-dots');
+  el.innerHTML = '';
+  arr.forEach((val, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    const isToday = i === todayIdx;
+    if (type === 'food')
+      d.classList.add(val ? (isToday ? 'today-food-on' : 'food-on') : (isToday ? 'today-off' : 'off'));
+    else
+      d.classList.add(val ? (isToday ? 'today-sport-on' : 'sport-on') : (isToday ? 'today-off' : 'off'));
+    d.onclick = () => toggleDot(who, type, i);
+    el.appendChild(d);
+  });
+}
+
+function renderKcal(who) {
+  const el = document.getElementById(who+'-kcal-row');
+  el.innerHTML = '';
+  state[who].kcal.forEach(v => {
+    const d = document.createElement('div');
+    d.className = 'kd ' + (v || 'none');
+    d.textContent = v==='def' ? '−' : v==='sup' ? '+' : v==='bal' ? '≈' : '';
+    el.appendChild(d);
+  });
+}
+
+function updateStats(who) {
+  const foodOn  = state[who].food.filter(v=>v).length;
+  const sportOn = state[who].sport.filter(v=>v).length;
+  const days    = Math.min(todayIdx + 1, 7);
+  document.getElementById(who+'-food-stat').textContent  = foodOn + '/' + days;
+  document.getElementById(who+'-sport-stat').textContent = String(sportOn);
+}
+
+function applyWeekData(who, data) {
+  weekDates.forEach((d, i) => {
+    const key = fmtDate(d);
+    if (data[key]) {
+      state[who].food[i]  = data[key].food  || 0;
+      state[who].sport[i] = data[key].sport || 0;
+      state[who].kcal[i]  = data[key].kcal  || null;
+    }
+  });
+  renderDots(who, 'food');
+  renderDots(who, 'sport');
+  renderKcal(who);
+  updateStats(who);
+}
+
+async function toggleDot(who, type, idx) {
+  const newVal = state[who][type][idx] ? 0 : 1;
+  state[who][type][idx] = newVal;
+  renderDots(who, type);
+  updateStats(who);
+  await api({ action:'setTracker', who, date: fmtDate(weekDates[idx]), type, value: newVal, kcal: state[who].kcal[idx] || '' });
+  showToast(newVal ? 'Отмечено ✓' : 'Отметка снята');
+}
+
+// ── KCAL PICKER ──────────────────────────────────────────────────
+function openKcal(who) {
+  document.getElementById(who+'-kcal-picker').classList.toggle('open');
+  ['def','bal','sup'].forEach(t =>
+    document.getElementById(who+'-opt-'+t).classList.toggle('selected', state[who].kcal[todayIdx]===t)
+  );
+}
+
+async function setKcal(who, val) {
+  state[who].kcal[todayIdx] = val;
+  renderKcal(who);
+  document.getElementById(who+'-kcal-picker').classList.remove('open');
+  const foodVal = state[who].food[todayIdx];
+  await api({ action:'setTracker', who, date: todayStr, type:'food', value: foodVal, kcal: val || '' });
+  showToast(val ? 'Калории сохранены ✓' : 'Сброшено');
+}
+
+// ── WEIGHT ───────────────────────────────────────────────────────
+let currentWeightWho = 'k';
+
+function renderWeight(who, data) {
+  const el = document.getElementById(who+'-weight-block');
+  if (data.avg) {
+    el.innerHTML = `<div class="wval">${data.avg} <span class="wkg">кг</span></div>
+      <div class="wsub">среднее за ${data.count} измерений</div>`;
+  } else {
+    el.innerHTML = `<div class="wsub" style="font-size:10px;color:var(--text4)">нет данных</div>`;
+  }
+}
+
+function openWeightModal(who) {
+  currentWeightWho = who;
+  const name = who === 'k' ? 'Компотик' : 'Пирожочек';
+  document.getElementById('weight-modal-title').textContent = 'Добавить вес — ' + name;
+  document.getElementById('weight-input').value = '';
+  document.getElementById('weight-modal').classList.add('open');
+  setTimeout(() => document.getElementById('weight-input').focus(), 100);
+}
+
+function closeWeightModal() {
+  document.getElementById('weight-modal').classList.remove('open');
+}
+
+async function submitWeight() {
+  const kg = parseFloat(document.getElementById('weight-input').value);
+  if (!kg || kg < 20 || kg > 300) { showToast('Введи корректный вес'); return; }
+  closeWeightModal();
+  showToast('Сохраняем...');
+  await api({ action:'addWeight', who: currentWeightWho, kg });
+  const data = await api({ action:'getWeight', who: currentWeightWho });
+  renderWeight(currentWeightWho, data);
+  showToast('Вес сохранён ✓');
+}
+
+document.getElementById('weight-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeWeightModal();
+});
+
+// ── DREAMS ───────────────────────────────────────────────────────
+function renderDreams(dreams) {
+  const el = document.getElementById('dreams-list');
+  if (!dreams.length) {
+    el.innerHTML = '<div class="dream-empty">Пока мечт нет — добавь первую!</div>'; return;
+  }
+  el.innerHTML = dreams.map(d => `
+    <div class="dream-item" id="dr-${d.id}">
+      <span class="dream-icon">${d.status==='done' ? '✅' : '○'}</span>
+      <span class="dream-text ${d.status==='done' ? 'done' : ''}">${escHtml(d.text)}</span>
+      ${d.tag ? `<span class="dream-tag ${d.status==='done' ? 'done' : ''}">${escHtml(d.tag)}</span>` : ''}
+      <div class="dream-actions">
+        ${d.status !== 'done' ? `<button class="dream-btn ok" onclick="doneDream('${d.id}')">исполнено</button>` : ''}
+        <button class="dream-btn" onclick="deleteDream('${d.id}')">удалить</button>
+      </div>
+    </div>`).join('');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function openDreamModal() {
+  document.getElementById('dream-text-input').value = '';
+  document.getElementById('dream-tag-input').value  = '';
+  document.getElementById('dream-modal').classList.add('open');
+  setTimeout(() => document.getElementById('dream-text-input').focus(), 100);
+}
+
+function closeDreamModal() {
+  document.getElementById('dream-modal').classList.remove('open');
+}
+
+async function submitDream() {
+  const text = document.getElementById('dream-text-input').value.trim();
+  const tag  = document.getElementById('dream-tag-input').value.trim();
+  if (!text) { showToast('Напиши мечту!'); return; }
+  closeDreamModal();
+  showToast('Добавляем...');
+  await api({ action:'addDream', text, tag });
+  const dreams = await api({ action:'getDreams' });
+  renderDreams(Array.isArray(dreams) ? dreams : []);
+  showToast('Мечта добавлена ✓');
+}
+
+document.getElementById('dream-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeDreamModal();
+});
+
+async function doneDream(id) {
+  await api({ action:'updateDream', id, status:'done' });
+  const dreams = await api({ action:'getDreams' });
+  renderDreams(Array.isArray(dreams) ? dreams : []);
+  showToast('Мечта исполнена! 🎉');
+}
+
+async function deleteDream(id) {
+  if (!confirm('Удалить эту мечту?')) return;
+  await api({ action:'deleteDream', id });
+  const dreams = await api({ action:'getDreams' });
+  renderDreams(Array.isArray(dreams) ? dreams : []);
+  showToast('Удалено');
+}
+
+// ── LINK BLOCKS (JSONBin) ────────────────────────────────────────
+const NOTE_KEYS = ['photo','music','films','purg','notes'];
+
+function toggleLink(hdr) {
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
+}
+
+async function loadNotes() {
+  if (!JSONBIN_KEY || JSONBIN_KEY === 'ТВОЙ_MASTER_KEY') {
+    NOTE_KEYS.forEach(k => {
+      const stored = localStorage.getItem('note_'+k);
+      if (stored) document.getElementById('note-'+k).textContent = stored;
+    });
+    return;
+  }
+  try {
+    const r = await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_ID + '/latest', {
+      headers: { 'X-Master-Key': JSONBIN_KEY }
+    });
+    const data = await r.json();
+    const notes = data.record || {};
+    NOTE_KEYS.forEach(k => {
+      if (notes[k]) document.getElementById('note-'+k).textContent = notes[k];
+    });
+  } catch(e) { /* используем localStorage как fallback */ }
+}
+
+async function saveNote(key, el) {
+  const val = el.textContent.trim();
+  localStorage.setItem('note_'+key, val);
+  if (!JSONBIN_KEY || JSONBIN_KEY === 'ТВОЙ_MASTER_KEY') return;
+  const notes = {};
+  NOTE_KEYS.forEach(k => { notes[k] = document.getElementById('note-'+k).textContent.trim(); });
+  try {
+    await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_ID, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'X-Master-Key': JSONBIN_KEY },
+      body: JSON.stringify(notes)
+    });
+  } catch(e) {}
+}
+
+// ── HOLIDAYS (iCal) ──────────────────────────────────────────────
+function parseIcal(text) {
+  const events = [];
+  const blocks = text.split('BEGIN:VEVENT');
+  blocks.slice(1).forEach(block => {
+    const dtstart = (block.match(/DTSTART[^:]*:(\d+)/) || [])[1];
+    const summary = (block.match(/SUMMARY:(.+)/) || [])[1];
+    if (dtstart && summary) {
+      const y = dtstart.slice(0,4), m = dtstart.slice(4,6), d = dtstart.slice(6,8);
+      events.push({ date: `${y}-${m}-${d}`, name: summary.trim() });
+    }
+  });
+  return events;
+}
+
+async function loadHolidays() {
+  if (!ICAL_URL) {
+    document.getElementById('today-holiday-block').innerHTML =
+      '<div class="no-holiday">Добавь ссылку на Google Календарь в коде (ICAL_URL)</div>';
+    document.getElementById('week-holidays-block').innerHTML = '';
+    return;
+  }
+  try {
+    const r    = await fetch(ICAL_URL);
+    const text = await r.text();
+    const events = parseIcal(text);
+    const todayEvents = events.filter(e => e.date === todayStr);
+    const block = document.getElementById('today-holiday-block');
+    if (todayEvents.length) {
+      block.innerHTML = todayEvents.map(e =>
+        `<div class="holiday-banner"><span class="hb-icon">🎉</span>
+         <div><div class="hb-title">${escHtml(e.name)}</div></div></div>`
+      ).join('');
+    } else {
+      block.innerHTML = '<div class="no-holiday">Праздников нет — просто хороший день</div>';
+    }
+    const weekEnd = fmtDate(weekDates[6]);
+    const weekEvents = events.filter(e => e.date > todayStr && e.date <= weekEnd);
+    const wblock = document.getElementById('week-holidays-block');
+    if (weekEvents.length) {
+      wblock.innerHTML = '<div class="week-holidays">' +
+        weekEvents.map(e => {
+          const ed = new Date(e.date);
+          const diff = Math.round((ed - now) / 86400000);
+          return `<div class="wh-row">
+            <span class="wh-date">${ed.getDate()} ${DAYS_RU[ed.getDay()]}</span>
+            <span class="wh-name">${escHtml(e.name)}</span>
+            <span class="wh-days">через ${diff} ${diff===1?'день':diff<5?'дня':'дней'}</span>
+          </div>`;
+        }).join('') + '</div>';
+    } else {
+      wblock.innerHTML = '<div class="no-holiday" style="margin-bottom:10px">Праздников на этой неделе нет</div>';
+    }
+  } catch(e) {
+    document.getElementById('today-holiday-block').innerHTML =
+      '<div class="no-holiday">Не удалось загрузить календарь</div>';
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+async function init() {
+  renderDots('k','food'); renderDots('k','sport'); renderKcal('k');
+  renderDots('p','food'); renderDots('p','sport'); renderKcal('p');
+  updateStats('k'); updateStats('p');
+  renderDreams([]);
+
+  loadHolidays();
+  loadNotes();
+
+  const [kWeek, pWeek, kWeight, pWeight, dreams] = await Promise.all([
+    api({ action:'getWeek', who:'k', weekStart }),
+    api({ action:'getWeek', who:'p', weekStart }),
+    api({ action:'getWeight', who:'k' }),
+    api({ action:'getWeight', who:'p' }),
+    api({ action:'getDreams' })
+  ]);
+
+  applyWeekData('k', kWeek);
+  applyWeekData('p', pWeek);
+  renderWeight('k', kWeight);
+  renderWeight('p', pWeight);
+  renderDreams(Array.isArray(dreams) ? dreams : []);
+}
+
+init();
+</script>
+</body>
+</html>
