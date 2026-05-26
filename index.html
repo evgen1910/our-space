@@ -522,7 +522,7 @@ async function loadHolidays(){
  
     const todayEv=events.filter(e=>e.date===todayStr);
     document.getElementById('today-holiday-block').innerHTML=todayEv.length
-      ?todayEv.map(e=>`<div class="holiday-banner"><span class="hb-icon">🎉</span><div><div class="hb-title">${esc(e.name)}</div></div></div>`).join('')
+      ?todayEv.map(e=>`<div class="holiday-banner"><span class="hb-icon">${esc(e.emoji||'🎉')}</span><div><div class="hb-title">${esc(e.name)}</div></div></div>`).join('')
       :'<div class="no-holiday">Праздников нет — просто хороший день ☀️</div>';
  
     const weekEnd=fmt(weekDates[6]);
@@ -533,7 +533,7 @@ async function loadHolidays(){
         const ed=new Date(e.date+'T12:00:00');
         const diff=Math.round((ed-new Date(todayStr+'T12:00:00'))/86400000);
         const word=diff===1?'день':diff<5?'дня':'дней';
-        return`<div class="wh-row"><span class="wh-date">${ed.getDate()} ${DAYS[ed.getDay()]}</span><span class="wh-name">${esc(e.name)}</span><span class="wh-days">через ${diff} ${word}</span></div>`;
+        return`<div class="wh-row"><span class="wh-date">${ed.getDate()} ${DAYS[ed.getDay()]}</span><span class="wh-name">${esc(e.emoji||'🎉')} ${esc(e.name)}</span><span class="wh-days">через ${diff} ${word}</span></div>`;
       }).join('')+'</div>';
     } else {
       wb.innerHTML='<div class="no-holiday" style="margin-bottom:10px">Праздников на этой неделе нет</div>';
