@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Статистика — Пирожочек и Компотик</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fdf8f4;--card:#fff;--border:#e8d8c8;--border2:#f0e4d8;
+  --accent:#c8845a;--accent2:#7a4a2a;--text:#5a3a1a;--text2:#9a6a3a;
+  --text3:#b07c55;--text4:#c8a07a;--pill:#f5ede3;
+  --k:#c8845a;--p:#7a4a2a;
+  --def:#4caf82;--bal:#c8a07a;--sup:#e07050;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html,body{background:var(--bg);font-family:var(--font);color:var(--text)}
+.header{background:var(--card);border-bottom:0.5px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.logo{width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.logo img{width:100%;height:100%;object-fit:cover}
+.header-title{font-size:14px;font-weight:600;color:var(--text)}
+.header-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.back{margin-left:auto;font-size:12px;color:var(--accent);text-decoration:none;padding:6px 10px;border:0.5px solid var(--border);border-radius:8px}
+.content{padding:14px;max-width:680px;margin:0 auto}
+.section{margin-bottom:24px}
+.sec-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.chart-wrap{position:relative;height:200px;width:100%}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{background:var(--pill);border-radius:10px;padding:10px 12px}
+.stat-card .who{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.stat-card .val{font-size:22px;font-weight:600;color:var(--accent2);line-height:1}
+.stat-card .lbl{font-size:10px;color:var(--text3);margin-top:2px}
+.stat-card.k .val{color:var(--k)}
+.stat-card.p .val{color:var(--p)}
+.legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.loading{text-align:center;padding:40px;font-size:13px;color:var(--text4)}
+.error{text-align:center;padding:20px;font-size:12px;color:var(--accent);background:var(--pill);border-radius:10px}
+.weight-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.weight-name{font-size:11px;color:var(--text3);width:70px;flex-shrink:0}
+.weight-bar-wrap{flex:1;background:var(--border2);border-radius:4px;height:8px;overflow:hidden}
+.weight-bar{height:8px;border-radius:4px;transition:width .6s}
+.weight-val{font-size:12px;font-weight:600;color:var(--accent2);width:50px;text-align:right;flex-shrink:0}
+.kcal-bars{display:flex;flex-direction:column;gap:8px}
+.kcal-row{display:flex;align-items:center;gap:8px}
+.kcal-name{font-size:11px;color:var(--text3);width:70px;flex-shrink:0}
+.kcal-seg-wrap{flex:1;display:flex;height:20px;border-radius:6px;overflow:hidden;gap:1px}
+.kcal-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#fff;transition:flex .6s;min-width:0}
+.kcal-seg.def{background:var(--def)}
+.kcal-seg.bal{background:var(--bal)}
+.kcal-seg.sup{background:var(--sup)}
+.week-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.week-tab{flex-shrink:0;padding:5px 10px;border-radius:8px;font-size:11px;border:0.5px solid var(--border);background:var(--card);color:var(--text3);cursor:pointer;white-space:nowrap}
+.week-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><img src="logo.png" alt="лого"></div>
+  <div>
+    <div class="header-title">Статистика</div>
+    <div class="header-sub">Пирожочек и Компотик</div>
+  </div>
+  <a class="back" href="index.html">← назад</a>
+</div>
+
+<div class="content">
+  <div id="main-content"><div class="loading">загружаем данные...</div></div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbzIIaqmHVm3C0SCIlYUCUneWkUM_iaOENrLkF0NXgmIH_RDGd-Ar3VPrKPKnoPkIac6/exec';
+function api(p){return fetch(API+'?'+new URLSearchParams(p).toString()).then(r=>r.json()).catch(()=>({}))}
+function fmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+// Получаем все данные за последние 12 недель
+async function loadAll() {
+  const now = new Date();
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - ((now.getDay()+6)%7));
+
+  // Собираем данные за 12 недель назад
+  const from = new Date(mon);
+  from.setDate(mon.getDate() - 77); // ~11 недель назад
+
+  const [kData, pData, kWeight, pWeight] = await Promise.all([
+    api({action:'getAllData', who:'k', from: fmt(from)}),
+    api({action:'getAllData', who:'p', from: fmt(from)}),
+    api({action:'getWeight', who:'k'}),
+    api({action:'getWeight', who:'p'})
+  ]);
+
+  return {kData, pData, kWeight, pWeight, now, mon};
+}
+
+// Группируем по неделям
+function groupByWeek(data, weekStarts) {
+  const result = {};
+  weekStarts.forEach(ws => {
+    result[ws] = {food:0, foodTotal:0, sport:0, def:0, bal:0, sup:0};
+  });
+  if (!data || data.error || !Array.isArray(data)) return result;
+
+  data.forEach(row => {
+    const date = row.date;
+    // Находим неделю
+    const d = new Date(date+'T12:00:00');
+    const weekMon = new Date(d);
+    weekMon.setDate(d.getDate() - ((d.getDay()+6)%7));
+    const ws = fmt(weekMon);
+    if (result[ws] !== undefined) {
+      if (row.type === 'food') {
+        result[ws].foodTotal++;
+        if (Number(row.value)) result[ws].food++;
+        if (row.kcal === 'def') result[ws].def++;
+        else if (row.kcal === 'bal') result[ws].bal++;
+        else if (row.kcal === 'sup') result[ws].sup++;
+      }
+      if (row.type === 'sport' && Number(row.value)) result[ws].sport++;
+    }
+  });
+  return result;
+}
+
+function weekLabel(ws) {
+  const d = new Date(ws+'T12:00:00');
+  const end = new Date(d); end.setDate(d.getDate()+6);
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  return d.getDate()+' '+months[d.getMonth()];
+}
+
+function renderCharts(kWeeks, pWeeks, weekStarts, kWeight, pWeight) {
+  const labels = weekStarts.map(weekLabel);
+
+  const kFood  = weekStarts.map(ws => kWeeks[ws].foodTotal > 0 ? Math.round(kWeeks[ws].food/kWeeks[ws].foodTotal*100) : 0);
+  const pFood  = weekStarts.map(ws => pWeeks[ws].foodTotal > 0 ? Math.round(pWeeks[ws].food/pWeeks[ws].foodTotal*100) : 0);
+  const kSport = weekStarts.map(ws => kWeeks[ws].sport);
+  const pSport = weekStarts.map(ws => pWeeks[ws].sport);
+
+  // Итого за всё время
+  const kFoodAvg  = Math.round(kFood.filter(v=>v>0).reduce((a,b)=>a+b,0) / (kFood.filter(v=>v>0).length||1));
+  const pFoodAvg  = Math.round(pFood.filter(v=>v>0).reduce((a,b)=>a+b,0) / (pFood.filter(v=>v>0).length||1));
+  const kSportSum = kSport.reduce((a,b)=>a+b,0);
+  const pSportSum = pSport.reduce((a,b)=>a+b,0);
+
+  // Калории итого
+  const kDef = weekStarts.reduce((s,ws)=>s+kWeeks[ws].def,0);
+  const kBal = weekStarts.reduce((s,ws)=>s+kWeeks[ws].bal,0);
+  const kSup = weekStarts.reduce((s,ws)=>s+kWeeks[ws].sup,0);
+  const pDef = weekStarts.reduce((s,ws)=>s+pWeeks[ws].def,0);
+  const pBal = weekStarts.reduce((s,ws)=>s+pWeeks[ws].bal,0);
+  const pSup = weekStarts.reduce((s,ws)=>s+pWeeks[ws].sup,0);
+  const kKcalTotal = kDef+kBal+kSup||1;
+  const pKcalTotal = pDef+pBal+pSup||1;
+
+  const chartDefaults = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9},color:'#c8a07a'}},
+      y:{grid:{color:'#f0e4d8'},ticks:{font:{size:9},color:'#c8a07a'},min:0}
+    }
+  };
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="section">
+      <div class="sec-label">📊 сводка за всё время</div>
+      <div class="stats-grid">
+        <div class="stat-card k"><div class="who">Компотик</div><div class="val">${kFoodAvg}%</div><div class="lbl">питание в среднем</div></div>
+        <div class="stat-card p"><div class="who">Пирожочек</div><div class="val">${pFoodAvg}%</div><div class="lbl">питание в среднем</div></div>
+        <div class="stat-card k"><div class="who">Компотик</div><div class="val">${kSportSum}</div><div class="lbl">тренировок всего</div></div>
+        <div class="stat-card p"><div class="who">Пирожочек</div><div class="val">${pSportSum}</div><div class="lbl">тренировок всего</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">🥗 питание по неделям, %</div>
+      <div class="card">
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" style="background:var(--k)"></div>Компотик</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--p)"></div>Пирожочек</div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-food"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">💪 тренировки по неделям</div>
+      <div class="card">
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" style="background:var(--k)"></div>Компотик</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--p)"></div>Пирожочек</div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-sport"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">🔥 калории — распределение</div>
+      <div class="card">
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" style="background:var(--def)"></div>дефицит</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--bal)"></div>поддержка</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--sup)"></div>профицит</div>
+        </div>
+        <div class="kcal-bars">
+          <div class="kcal-row">
+            <div class="kcal-name">Компотик</div>
+            <div class="kcal-seg-wrap">
+              <div class="kcal-seg def" style="flex:${kDef}">${kDef>0?Math.round(kDef/kKcalTotal*100)+'%':''}</div>
+              <div class="kcal-seg bal" style="flex:${kBal}">${kBal>0?Math.round(kBal/kKcalTotal*100)+'%':''}</div>
+              <div class="kcal-seg sup" style="flex:${kSup}">${kSup>0?Math.round(kSup/kKcalTotal*100)+'%':''}</div>
+            </div>
+          </div>
+          <div class="kcal-row">
+            <div class="kcal-name">Пирожочек</div>
+            <div class="kcal-seg-wrap">
+              <div class="kcal-seg def" style="flex:${pDef}">${pDef>0?Math.round(pDef/pKcalTotal*100)+'%':''}</div>
+              <div class="kcal-seg bal" style="flex:${pBal}">${pBal>0?Math.round(pBal/pKcalTotal*100)+'%':''}</div>
+              <div class="kcal-seg sup" style="flex:${pSup}">${pSup>0?Math.round(pSup/pKcalTotal*100)+'%':''}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">⚖️ вес</div>
+      <div class="card" id="weight-card"></div>
+    </div>
+  `;
+
+  // График питания
+  new Chart(document.getElementById('chart-food'), {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'Компотик',data:kFood,borderColor:'#c8845a',backgroundColor:'rgba(200,132,90,.1)',tension:.3,pointRadius:3,pointBackgroundColor:'#c8845a',fill:true},
+        {label:'Пирожочек',data:pFood,borderColor:'#7a4a2a',backgroundColor:'rgba(122,74,42,.1)',tension:.3,pointRadius:3,pointBackgroundColor:'#7a4a2a',fill:true}
+      ]
+    },
+    options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,max:100,ticks:{...chartDefaults.scales.y.ticks,callback:v=>v+'%'}}}}
+  });
+
+  // График тренировок
+  new Chart(document.getElementById('chart-sport'), {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Компотик',data:kSport,backgroundColor:'rgba(200,132,90,.7)',borderRadius:4},
+        {label:'Пирожочек',data:pSport,backgroundColor:'rgba(122,74,42,.7)',borderRadius:4}
+      ]
+    },
+    options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,ticks:{...chartDefaults.scales.y.ticks,stepSize:1}}}}
+  });
+
+  // Вес
+  const wc = document.getElementById('weight-card');
+  const kW = kWeight && kWeight.avg;
+  const pW = pWeight && pWeight.avg;
+  const maxW = Math.max(kW||0, pW||0, 50);
+  wc.innerHTML = `
+    <div class="stats-grid" style="margin-bottom:14px">
+      <div class="stat-card k"><div class="who">Компотик</div><div class="val">${kW||'—'} <span style="font-size:12px;font-weight:400;color:var(--text3)">${kW?'кг':''}</span></div><div class="lbl">среднее за ${kWeight&&kWeight.count||0} измерений</div></div>
+      <div class="stat-card p"><div class="who">Пирожочек</div><div class="val">${pW||'—'} <span style="font-size:12px;font-weight:400;color:var(--text3)">${pW?'кг':''}</span></div><div class="lbl">среднее за ${pWeight&&pWeight.count||0} измерений</div></div>
+    </div>
+    ${kW ? `<div class="weight-row"><div class="weight-name">Компотик</div><div class="weight-bar-wrap"><div class="weight-bar" style="width:${Math.round(kW/maxW*100)}%;background:var(--k)"></div></div><div class="weight-val">${kW} кг</div></div>` : ''}
+    ${pW ? `<div class="weight-row" style="margin-top:8px"><div class="weight-name">Пирожочек</div><div class="weight-bar-wrap"><div class="weight-bar" style="width:${Math.round(pW/maxW*100)}%;background:var(--p)"></div></div><div class="weight-val">${pW} кг</div></div>` : ''}
+    ${!kW&&!pW ? '<div style="font-size:12px;color:var(--text4);text-align:center;padding:10px 0">Данных пока нет — добавь вес в трекере</div>' : ''}
+  `;
+}
+
+async function init() {
+  try {
+    const {kData, pData, kWeight, pWeight, now, mon} = await loadAll();
+
+    // Последние 8 недель
+    const weekStarts = [];
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(mon);
+      d.setDate(mon.getDate() - i*7);
+      weekStarts.push(fmt(d));
+    }
+
+    const kWeeks = groupByWeek(kData, weekStarts);
+    const pWeeks = groupByWeek(pData, weekStarts);
+
+    renderCharts(kWeeks, pWeeks, weekStarts, kWeight, pWeight);
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = '<div class="error">Не удалось загрузить данные. Проверь подключение.</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
